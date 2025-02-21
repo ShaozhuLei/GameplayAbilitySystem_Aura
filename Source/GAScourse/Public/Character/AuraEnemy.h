@@ -14,12 +14,17 @@
  * 
  */
 
+class UBehaviorTree;
+class AAuraAIController;
+
 UCLASS()
 class GASCOURSE_API AAuraEnemy : public AAuraCharacterBase, public IEnemyInterface
 {
 	GENERATED_BODY()
 public:
 	AAuraEnemy();
+
+	virtual void PossessedBy(AController* NewController) override;
 
 	//Enemy Interface
 	virtual void HighlightActor() override;
@@ -66,6 +71,12 @@ protected:
 	//敌人血条组件
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
+
+	UPROPERTY(EditAnywhere, Category= "AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+	
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
 	
 
 	
