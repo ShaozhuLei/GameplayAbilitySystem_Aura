@@ -29,8 +29,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
 	if (CombatInterface)
 	{
-		const FVector SocketLocation = CombatInterface->GetCombatSocketLocation();
-		
+		const FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo());
 		//计算一个起始发射位置到目标位置的一个旋转
 		FRotator Rotator = (ProjectileTargetLocation - SocketLocation).Rotation();
 
@@ -41,7 +40,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		 * 发射位置设计为法杖，而不是角色本身
 		 * 为角色创建一个能够提供自己武器位置的接口
 		 */
-		FTransform  SpawnTransform;
+		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SocketLocation);
 		//设置发射物旋转
 		SpawnTransform.SetRotation(Rotator.Quaternion());
