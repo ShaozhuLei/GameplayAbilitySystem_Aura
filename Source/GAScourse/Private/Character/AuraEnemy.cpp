@@ -33,6 +33,7 @@ AAuraEnemy::AAuraEnemy()
 	
 }
 
+
 void AAuraEnemy::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
