@@ -3,8 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
+
+USTRUCT(BlueprintType)
+struct FTagMontage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* Montage = nullptr;
+
+	UPROPERTY(editAnywhere, BlueprintReadOnly)
+	FGameplayTag MontageTag;
+};
 
 class UAnimMontage;
 
@@ -28,7 +41,7 @@ public:
 	
 	//返回角色的Socket Location
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	FVector GetCombatSocketLocation();
+	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag);
 
 	//返回自己要面向的方向. BlueprintImplementableEvent不需要Virtual来修饰
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
@@ -52,4 +65,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	AActor* GetAvatar();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	TArray<FTagMontage> GetAttackMontage();
 };

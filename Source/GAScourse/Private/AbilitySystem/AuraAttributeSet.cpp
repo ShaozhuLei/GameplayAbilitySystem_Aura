@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Character/AuraCharacter.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerController.h"
@@ -190,11 +191,16 @@ void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props,const fl
 	 	//Props.SourceCharacter->Controller
 	 	if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->Controller))
 	 	{
-	 		//ShowDamageNumber_Implementation是在AuraPlayerController中实现的一个方法
+	 		//ShowDamageNumber是在AuraPlayerController中实现的一个方法
+	 		PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockHit, bCriticalHit);
+	 		return;
+	 	}
+
+	 	if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.TargetCharacter->Controller))
+	 	{
 	 		PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockHit, bCriticalHit);
 	 	}
 	 }
-	
 }
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
