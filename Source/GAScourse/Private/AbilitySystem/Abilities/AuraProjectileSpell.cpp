@@ -70,13 +70,12 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		
 		for (auto& Pair: DamageTypes)
 		{
-			const float SclableDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, SclableDamage);
+			const float ScalableDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScalableDamage);
 		}
 		
 		//通过该Projectile所携带的Handle应用到Target上;此时SpecHandle携带着<Tag, Damage> pair; DamageEffectSpecHandle是发射物基类的属性
 		Projectile->DamageEffectSpecHandle = SpecHandle;
-		
 		Projectile->FinishSpawning(SpawnTransform);
 		
 	}
