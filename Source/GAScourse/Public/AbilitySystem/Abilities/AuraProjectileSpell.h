@@ -23,7 +23,7 @@ protected:
 
 	//参数是目标位置
 	UFUNCTION(BlueprintCallable, Category="Projectile")
-	void SpawnProjectile(const FVector& ProjectileTargetLocation);
+	void SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag);
 	
 	//需要一个能够生成发射物的Class
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

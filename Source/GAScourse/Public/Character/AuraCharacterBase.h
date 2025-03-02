@@ -34,6 +34,8 @@ public:
 	virtual bool IsDead_Implementation() const override;
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual TArray<FTagMontage> GetAttackMontage_Implementation() override;
+	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
+	virtual FTagMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
 
 	//控制所有客户端中角色的死亡
 	UFUNCTION(NetMulticast, Reliable)
@@ -57,6 +59,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Combat")
 	FName RightHandSocketName;
+
+	UPROPERTY(EditAnywhere, Category="Combat")
+	FName TailSocketName;
 
 	bool IsDead = false;
 
@@ -105,6 +110,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UNiagaraSystem* BloodEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USoundBase* DeathSound;
 
 private:
 	
