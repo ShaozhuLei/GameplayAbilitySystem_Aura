@@ -82,4 +82,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	FTagMontage GetTaggedMontageByTag(const FGameplayTag& MontageTag);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int32 GetMinionCount();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void IncrementMinionCount(const int32 Amount);
 };

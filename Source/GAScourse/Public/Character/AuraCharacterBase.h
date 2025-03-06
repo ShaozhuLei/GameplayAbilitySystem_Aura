@@ -36,6 +36,8 @@ public:
 	virtual TArray<FTagMontage> GetAttackMontage_Implementation() override;
 	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 	virtual FTagMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
+	virtual int32 GetMinionCount_Implementation() override;
+	virtual void IncrementMinionCount_Implementation(const int32 Amount) override;
 
 	//控制所有客户端中角色的死亡
 	UFUNCTION(NetMulticast, Reliable)
@@ -116,6 +118,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USoundBase* DeathSound;
+
+	int32 MinionCount = 0;
 
 private:
 	
