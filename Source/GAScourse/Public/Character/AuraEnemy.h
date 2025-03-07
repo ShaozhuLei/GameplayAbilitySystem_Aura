@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "AuraCharacterBase.h"
 #include "Components/WidgetComponent.h"
-#include "Data/CharacterClassInfo.h"
 #include "Interaction/EnemyInterface.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
@@ -69,10 +68,7 @@ protected:
 	//不做Replication的原因是，level只在服务器端进行追踪
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Charater Class Defaults")
 	int32 Level = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Charater Class Defaults")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
-
+	
 	//敌人血条组件
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;

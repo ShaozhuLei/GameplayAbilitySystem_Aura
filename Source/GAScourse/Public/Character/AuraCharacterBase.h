@@ -38,6 +38,7 @@ public:
 	virtual FTagMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
 	virtual int32 GetMinionCount_Implementation() override;
 	virtual void IncrementMinionCount_Implementation(const int32 Amount) override;
+	virtual ECharacterClass GetCharacterClass_Implementation() override;
 
 	//控制所有客户端中角色的死亡
 	UFUNCTION(NetMulticast, Reliable)
@@ -120,6 +121,9 @@ protected:
 	USoundBase* DeathSound;
 
 	int32 MinionCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Default")
+	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 
 private:
 	
