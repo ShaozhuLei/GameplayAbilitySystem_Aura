@@ -45,7 +45,66 @@ void AAuraCharacter::OnRep_PlayerState()
 	
 }
 
-int32 AAuraCharacter::GetPlayerLevel()
+void AAuraCharacter::AddToXP_Implementation(const int32 InXP)
+{
+	AAuraPlayerState* AuraPS = Cast<AAuraPlayerState>(GetPlayerState());
+	check(AuraPS);
+	AuraPS->AddToXP(InXP);
+}
+
+void AAuraCharacter::LevelUp_Implementation()
+{
+	IPlayerInterface::LevelUp_Implementation();
+}
+
+int32 AAuraCharacter::FindLevelForXP_Implementation(int32 InXP)
+{
+	const AAuraPlayerState* AuraPS = GetPlayerState<AAuraPlayerState>();
+	check(AuraPS);
+	return AuraPS->LevelUpInfo->FindLevelForXP(InXP);
+}
+
+int32 AAuraCharacter::GetXP_Implementation()
+{
+	const AAuraPlayerState* AuraPS = GetPlayerState<AAuraPlayerState>();
+	check(AuraPS);
+	return AuraPS->GetPlayerXP();
+}
+
+int32 AAuraCharacter::GetAttributePointsReward_Implementation()
+{
+	const AAuraPlayerState* AuraPS = GetPlayerState<AAuraPlayerState>();
+	check(AuraPS);
+	const FAuraLevelUpInfo AuraLevelUpInfo = AuraPS->LevelUpInfo->LevelUpInformation[AuraPS->GetPlayerXP()];
+	return AuraLevelUpInfo.AttributePointReward;
+}
+
+int32 AAuraCharacter::GetSpellPointsReward_Implementation()
+{
+	const AAuraPlayerState* AuraPS = GetPlayerState<AAuraPlayerState>();
+	check(AuraPS);
+	const FAuraLevelUpInfo AuraLevelUpInfo = AuraPS->LevelUpInfo->LevelUpInformation[AuraPS->GetPlayerXP()];
+	return AuraLevelUpInfo.SpellPointReward;
+}
+
+void AAuraCharacter::AddToPlayerLevel_Implementation(const int32 InPlayerLevel)
+{
+	AAuraPlayerState* AuraPS = GetPlayerState<AAuraPlayerState>();
+	check(AuraPS);
+	AuraPS->AddToLevel(InPlayerLevel);
+}
+
+void AAuraCharacter::AddToAttributePointPoints_Implementation(int32 InAttributePoints)
+{
+	IPlayerInterface::AddToAttributePointPoints_Implementation(InAttributePoints);
+}
+
+void AAuraCharacter::AddToSpellPoints_Implementation(int32 InSpellPoints)
+{
+	IPlayerInterface::AddToSpellPoints_Implementation(InSpellPoints);
+}
+
+int32 AAuraCharacter::GetPlayerLevel_Implementation()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
@@ -59,7 +118,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	//检测 player_state
 	check(AuraPlayerState);
-	//通过player state，GetAbilitComponent来调用InitAbilityActorInfo()
+	//通过player state，GetAbilityComponent来调用InitAbilityActorInfo()
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this); 
 
 	/*调用AuraAbilitySystemComponent中的一个函数(GE 代理绑定函数), */

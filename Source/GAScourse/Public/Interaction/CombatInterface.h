@@ -46,7 +46,8 @@ class GASCOURSE_API ICombatInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual int32 GetPlayerLevel();
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetPlayerLevel();
 	
 	//返回角色的Socket Location
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)

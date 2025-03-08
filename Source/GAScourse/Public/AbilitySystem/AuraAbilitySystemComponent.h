@@ -23,6 +23,7 @@ public:
 	FAbilitiesGiven AbilitiesGivenDelegate;
 	
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
+	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities);
 	bool bStartupAbilitiesGiven = false;
 
 	//从PlayerController中调用这些函数

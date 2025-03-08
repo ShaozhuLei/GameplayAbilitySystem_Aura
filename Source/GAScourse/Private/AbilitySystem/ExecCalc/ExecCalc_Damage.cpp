@@ -102,9 +102,18 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	AActor* SourceAvatar = SourceASC? SourceASC->GetAvatarActor(): nullptr;
 	AActor* TargetAvatar = TargetASC? TargetASC->GetAvatarActor(): nullptr;
-	//将通过接口获取实现了接口角色的等级
-	ICombatInterface* SourceCombatInterface = Cast<ICombatInterface>(SourceAvatar);
-	ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(TargetAvatar);
+
+	int32 SourcePlayerLevel = 1;
+	if (SourceAvatar->Implements<UCombatInterface>())
+	{
+		SourcePlayerLevel = ICombatInterface::Execute_GetPlayerLevel(SourceAvatar);
+	}
+
+	int32 TargetPlayerLevel = 1;
+	if (TargetAvatar->Implements<UCombatInterface>())
+	{
+		TargetPlayerLevel = ICombatInterface::Execute_GetPlayerLevel(SourceAvatar);
+	}
 
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 	
@@ -173,13 +182,13 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	//从CT表中找对应的曲线
 	const FRealCurve* ArmorPenetration = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("ArmorPenetration"), FString());
 	//通过等级来查询对性的系数值，ArmorPenetrationCoefficient就是某一等级下对应的系数值
-	const float ArmorPenetrationCoefficient = ArmorPenetration->Eval(SourceCombatInterface->GetPlayerLevel());
+	const float ArmorPenetrationCoefficient = ArmorPenetration->Eval(SourcePlayerLevel);
 	
 
 	//相同的方式获取有效护甲值
 	const float EffectiveArmor = TargetArmor * (1 - (SourceArmorPenetration * ArmorPenetrationCoefficient)/100.f);
 	const FRealCurve* EffectiveArmorCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("EffectiveArmor"), FString());
-	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(TargetCombatInterface->GetPlayerLevel());
+	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(TargetPlayerLevel);
 
 	Damage *= (100 - EffectiveArmor * EffectiveArmorCoefficient)/ 100.f;
 
@@ -200,7 +209,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	/*暴击计算*/
 	//读表
 	const FRealCurve* CriticalHitResistance = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("CriticalHitResistance"), FString());
-	const float CriticalHitResistanceCoefficient = CriticalHitResistance->Eval(SourceCombatInterface->GetPlayerLevel());
+	const float CriticalHitResistanceCoefficient = CriticalHitResistance->Eval(TargetPlayerLevel);
 	
 	const float EffectiveCriticalHitChance = SourceCriticalHitChance - TargetCriticalHitResistance * CriticalHitResistanceCoefficient;
 	const bool bCriticalHit = FMath::RandRange(1, 100) < EffectiveCriticalHitChance;
