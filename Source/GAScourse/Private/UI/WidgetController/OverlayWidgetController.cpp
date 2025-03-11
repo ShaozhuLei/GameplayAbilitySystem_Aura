@@ -29,7 +29,11 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
 	AuraPlayerState->OnXPChangedDelegate.AddUObject(this, &UOverlayWidgetController::OnXPChanged);
-	 
+	AuraPlayerState->OnLevelChangedDelegate.AddLambda(
+		[this](const int32 Level){
+			OnLevelChangedDelegate.Broadcast(Level);
+		}
+	);
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 	
 	//用于监听指定属性（Gameplay Attribute）的值变化。当属性值发生变化时，触发相关的回调函数

@@ -201,10 +201,11 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			if (NumsLevel > 0)
 			{
 				//查看该等级应该给几个加点
-				const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter);
-				const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter);
+				const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
+				const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
 
-				IPlayerInterface::Execute_AddToAttributePointPoints(Props.SourceCharacter, AttributePointsReward);
+				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumsLevel);
+				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
 				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 
 				//升级可以恢复满血满蓝
@@ -247,7 +248,7 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props)
 		const ECharacterClass TargetClass = ICombatInterface::Execute_GetCharacterClass(Props.TargetCharacter);
 		const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForClassAndLevel(Props.TargetCharacter, TargetClass, TargetLevel);
 
-		const FGameplayTag& GameplayTag = FAuraGameplayTags::Get().Attributes_Meta_IncomingXP;
+		const FGameplayTag& GameplayTag = FAuraGameplayTags::Get().Attribute_Meta_IncomingXP;
 		FGameplayEventData Payload;
 		Payload.EventTag = GameplayTag;
 		Payload.EventMagnitude = XPReward;

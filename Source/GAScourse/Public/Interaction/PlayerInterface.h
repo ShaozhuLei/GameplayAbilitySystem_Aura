@@ -25,19 +25,19 @@ public:
 
 	//通过XP查当前等级
 	UFUNCTION(BlueprintNativeEvent)
-	int32 FindLevelForXP(int32 InXP);
+	int32 FindLevelForXP(int32 InXP) const;
 
 	//获取XP总量
 	UFUNCTION(BlueprintNativeEvent)
-	int32 GetXP();
+	int32 GetXP() const;
 
 	//获取当前属性加点
 	UFUNCTION(BlueprintNativeEvent)
-	int32 GetAttributePointsReward();
+	int32 GetAttributePointsReward(int32 Level) const;
 
 	//获取当前技能加点
 	UFUNCTION(BlueprintNativeEvent)
-	int32 GetSpellPointsReward();
+	int32 GetSpellPointsReward(int32 Level) const;
 
 	//给角色加XP
 	UFUNCTION(BlueprintNativeEvent)
@@ -49,7 +49,7 @@ public:
 
 	//给角色加属性点
 	UFUNCTION(BlueprintNativeEvent)
-	void AddToAttributePointPoints(int32 InAttributePoints);
+	void AddToAttributePoints(int32 InAttributePoints);
 
 	//给角色加技能点
 	UFUNCTION(BlueprintNativeEvent)
@@ -58,5 +58,11 @@ public:
 	//升级
 	UFUNCTION(BlueprintNativeEvent)
 	void LevelUp();
+
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetAttributePoints() const;
+
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetSpellPoints() const;
 	
 };

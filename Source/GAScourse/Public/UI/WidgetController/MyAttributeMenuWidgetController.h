@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Data/AttributeInfo.h"
+#include "Player/AuraPlayerState.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "MyAttributeMenuWidgetController.generated.h"
-
-
+struct FGameplayTag;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeInfoSignature, const FAuraAttributeInfo, Info);
+
 /**
  * 
  */
@@ -22,6 +23,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, category = "GAS|Attributes")
 	FAttributeInfoSignature AttributeInfoDelegate;
+
+	UPROPERTY(BlueprintAssignable, category = "GAS|Attributes")
+	FOnPlayerStateChanged AttributePointChangedDelegates;
+
+	UFUNCTION(BlueprintCallable)
+	void UpgradeAttribute(const FGameplayTag& AttributeTag);
 
 protected:
 	//暴露给蓝图，蓝图中为此变量赋予Data Asset
