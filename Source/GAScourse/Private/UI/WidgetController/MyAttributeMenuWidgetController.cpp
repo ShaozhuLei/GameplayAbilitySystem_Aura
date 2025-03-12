@@ -15,10 +15,7 @@
 
 void UMyAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
-	UAuraAttributeSet* AS = CastChecked<UAuraAttributeSet>(AttributeSet);
-	
-	
-	for (auto& Pair: AS->TagsToAttributes)
+	for (auto& Pair: GetAuraAS()->TagsToAttributes)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
 		[this, Pair](const FOnAttributeChangeData& Data)
@@ -27,9 +24,8 @@ void UMyAttributeMenuWidgetController::BindCallbacksToDependencies()
 		}
 		);
 	}
-
-	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	AuraPlayerState->OnAttributePointsChangedDelegate.AddLambda(
+	
+	GetAuraPS()->OnAttributePointsChangedDelegate.AddLambda(
 		[this](const int32 AttributePoints){
 			AttributePointChangedDelegates.Broadcast(AttributePoints);
 		}

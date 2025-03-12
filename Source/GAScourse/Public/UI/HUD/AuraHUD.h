@@ -8,6 +8,7 @@
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraHUD.generated.h"
 class UMyAttributeMenuWidgetController;
+class USpellMenuWidgetController;
 /**
  * 
  */
@@ -20,6 +21,7 @@ public:
 	//获取主UI 控制器, 参数为四项的结构体
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams WCParams);
 	UMyAttributeMenuWidgetController* GetMyAttributeMenuWidgetController(const FWidgetControllerParams WCParams);
+	USpellMenuWidgetController* GetSpellMenuWidgetController(const FWidgetControllerParams WCParams);
 
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
 
@@ -33,19 +35,23 @@ private:
 	//UserWidget基类
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UAuraUserWidget> OverlayWidgetClass;
+
+	/*SpellMenu WC*/
+	UPROPERTY()
+	TObjectPtr<USpellMenuWidgetController> SpellMenuWidgetController;
 	
-
-
-	//主UI控制器的指针
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<USpellMenuWidgetController> SpellMenuWidgetControllerClass;
+	/*SpellMenu WC*/
+	
+	/*OverlayWidgetController*/
 	UPROPERTY()
 	TObjectPtr<UOverlayWidgetController> OverlayWidgetController;
-
-	//主UI控制器的实例
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
-
-
-
+	/*End OverlayWidgetController*/
+	
 	//存放AttributeMenuWidgetController
 	UPROPERTY()
 	TObjectPtr<UMyAttributeMenuWidgetController> AttributeMenuWidgetController;
