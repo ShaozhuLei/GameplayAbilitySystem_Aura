@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/AbilityInfo.h"
 #include "Data/CharacterClassInfo.h"
 #include "GameFramework/GameModeBase.h"
 #include "AuraGameModeBase.generated.h"
@@ -20,5 +21,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Character Class Default")
 	TObjectPtr<UCharacterClassInfo> CharacterClassInfo;
 
-	
+	UPROPERTY(EditDefaultsOnly, Category="Ability Class Default")
+	TObjectPtr<UAbilityInfo> AbilityInfo;
 };
