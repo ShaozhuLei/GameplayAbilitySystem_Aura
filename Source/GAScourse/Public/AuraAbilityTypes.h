@@ -1,7 +1,66 @@
 ﻿#pragma once
 
 #include "GameplayEffectTypes.h"
+#include <stdbool.h>
 #include "AuraAbilityTypes.generated.h"
+class UGameplayEffect;
+
+USTRUCT(BlueprintType)
+struct FDamageEffectParams
+{
+	GENERATED_BODY()
+
+	FDamageEffectParams(){}
+
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UObject> WorldContextObjectPtr = nullptr;
+
+	UPROPERTY(BlueprintReadWrite)
+	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
+
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UAbilitySystemComponent> SourceAbilitySystemComponent;
+ 
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UAbilitySystemComponent> TargetAbilitySystemComponent;
+ 
+	UPROPERTY(BlueprintReadWrite)
+	float BaseDamage = 0.f;
+ 
+	UPROPERTY(BlueprintReadWrite)
+	float AbilityLevel = 1.f;
+ 
+	UPROPERTY(BlueprintReadWrite)
+	FGameplayTag DamageType = FGameplayTag();
+ 
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffChance = 0.f;
+ 
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffDamage = 0.f;
+ 
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffDuration = 0.f;
+ 
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffFrequency = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	float DeathImpulseMagnitude = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector DeathImpulse = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite)
+	float KnockBackMagnitude = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector KnockbackForce = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite)
+	float KnockbackChance = 0.f;
+	
+};
 /*自定义FGamgeplayEffectContext类*/
 USTRUCT(BlueprintType)
 struct FAuraGameplayEffectContext: public FGameplayEffectContext
@@ -11,9 +70,23 @@ struct FAuraGameplayEffectContext: public FGameplayEffectContext
 public:
 	bool IsBlockHit()const{return bIsBlockHit;}
 	bool IsCriticalHit()const{return bIsCriticalHit;}
+	bool IsSuccessfulDebuff() const { return bIsSuccessfulDebuff; }
+	float GetDebuffDamage() const { return DebuffDamage; }
+	float GetDebuffDuration() const { return DebuffDuration; }
+	float GetDebuffFrequency() const { return DebuffFrequency; }
+	TSharedPtr<FGameplayTag> GetDamageType() const { return DamageType; }
+	FVector GetDeathImpulse() const { return DeathImpulse; }
+	FVector GetKnockbackForce() const { return KnockbackForce; }
 	
 	void SetIsBlockHit(bool isBlockHit){bIsBlockHit = isBlockHit;}
 	void SetIsCriticalHit(bool isCriticalHit){bIsCriticalHit = isCriticalHit;}
+	void SetIsSuccessfulDebuff(bool bInIsDebuff) { bIsSuccessfulDebuff = bInIsDebuff; }
+	void SetDebuffDamage(float InDamage) { DebuffDamage = InDamage; }
+	void SetDebuffDuration(float InDuration) { DebuffDuration = InDuration; }
+	void SetDebuffFrequency(float InFrequency) { DebuffFrequency = InFrequency; }
+	void SetDamageType(TSharedPtr<FGameplayTag> InDamageType){DamageType = InDamageType; }
+	void SetDeathImpulse(const FVector& InImpulse) { DeathImpulse = InImpulse; }
+	void SetKnockbackForce(const FVector& InForce){KnockbackForce = InForce;}
 	
 	/*类似于 GetClass() 但适用于 USTRUCT。用于序列化（Serialization）、网络复制（Replication）等场景*/
 	virtual UScriptStruct* GetScriptStruct() const
@@ -44,6 +117,26 @@ protected:
 
 	UPROPERTY()
 	bool bIsCriticalHit = false;
+
+	UPROPERTY()
+	bool bIsSuccessfulDebuff = false;
+ 
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+ 
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+ 
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+ 
+	TSharedPtr<FGameplayTag> DamageType;
+
+	UPROPERTY()
+	FVector DeathImpulse = FVector::ZeroVector;
+
+	UPROPERTY()
+	FVector KnockbackForce = FVector::ZeroVector;
 };
 
 /*

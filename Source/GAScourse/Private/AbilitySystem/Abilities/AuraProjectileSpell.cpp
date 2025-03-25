@@ -9,26 +9,6 @@
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
 
-FString UAuraProjectileSpell::GetDescription(int32 Level)
-{
-	const int32 Damage = DamageTypes[FAuraGameplayTags::Get().Damage_Fire].GetValueAtLevel(Level);
-	if (Level == 1)
-	{
-		return FString::Printf(TEXT("<Title>FIRE BOLT</>\n\n<Default>Launches a bolt of fire, exploding on impact and dealing: </><Damage>%d</><Default> fire damage with a chance to burn</>\n\n<Small>Level: </><Level>%d</>"), Damage, Level);
-	}
-	else
-	{
-		return FString::Printf(TEXT("<Title>FIRE BOLT</>\n\n<Default>Launches %d bolts of fire, exploding on impact and dealing: </><Damage>%d</><Default> fire damage with a chance to burn</>\n\n<Small>Level: </><Level>%d</>"), FMath::Min(Level, NumProjectiles), Damage, Level);
-	}
-	
-}
-
-FString UAuraProjectileSpell::GetNextLevelDescription(int32 Level)
-{
-	const int32 Damage = DamageTypes[FAuraGameplayTags::Get().Damage_Fire].GetValueAtLevel(Level);
-	return FString::Printf(TEXT("<Title>NEXT LEVEL: </>\n\n<Default>Launches %d bolts of fire, exploding on impact and dealing: </><Damage>%d</><Default> fire damage with a chance to burn</>\n\n<Small>Level: </><Level>%d</>"), FMath::Min(Level, NumProjectiles), Damage, Level);
-}
-
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                            const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                            const FGameplayEventData* TriggerEventData)
@@ -71,30 +51,27 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 
 		/*赋予发射物一个GA用来造成伤害,要利用ASC来封装Spec*/
 		//先通过静态方法获取ASC
-		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
-		FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
-		EffectContextHandle.SetAbility(this);
-		EffectContextHandle.AddSourceObject(Projectile);
-		TArray<TWeakObjectPtr<AActor>> Actors;
-		Actors.Add(Projectile);
-		EffectContextHandle.AddActors(Actors);
-		FHitResult HitResult;
-		HitResult.Location= ProjectileTargetLocation;
-		EffectContextHandle.AddHitResult(HitResult);
-		
-		//利用GE,等级,ContextHandle来封装GE_SpecHandle
-		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
-		const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-		
-		for (auto& Pair: DamageTypes)
-		{
-			const float ScalableDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScalableDamage);
-		}
+		// const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
+		// FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+		// EffectContextHandle.SetAbility(this);
+		// EffectContextHandle.AddSourceObject(Projectile);
+		// TArray<TWeakObjectPtr<AActor>> Actors;
+		// Actors.Add(Projectile);
+		// EffectContextHandle.AddActors(Actors);
+		// FHitResult HitResult;
+		// HitResult.Location= ProjectileTargetLocation;
+		// EffectContextHandle.AddHitResult(HitResult);
+		//
+		// //利用GE,等级,ContextHandle来封装GE_SpecHandle
+		// const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
+		// const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+		//
+		// const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
+		// UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageType, ScaledDamage);
 		
 		//通过该Projectile所携带的Handle应用到Target上;此时SpecHandle携带着<Tag, Damage> pair; DamageEffectSpecHandle是发射物基类的属性
-		Projectile->DamageEffectSpecHandle = SpecHandle;
+		//Projectile->DamageEffectSpecHandle = SpecHandle;
+		Projectile->DamageEffectParams = MakeDamageParamFromClassDefaults();
 		Projectile->FinishSpawning(SpawnTransform);
-		
 	}
 }

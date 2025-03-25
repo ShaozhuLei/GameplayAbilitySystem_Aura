@@ -17,6 +17,12 @@ class GASCOURSE_API UExecCalc_Damage : public UGameplayEffectExecutionCalculatio
 public:	
 	UExecCalc_Damage();
 
+	void DetermineDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+		const FGameplayEffectSpec& Spec,
+		FAggregatorEvaluateParameters EvaluationParameters,
+		const TMap<FGameplayTag,
+		FGameplayEffectAttributeCaptureDefinition>& InTagsToDefs) const;
+
 	//什么类型的Execution将发生; FGameplayEffectCustomExecutionParameters是一个结构体
 	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
 };
