@@ -358,6 +358,53 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 	return ContextHandle;
 }
 
+TArray<FRotator> UAuraAbilitySystemLibrary::EvenlySpaceRotators(const FVector& Forward, const FVector& Axis,
+	float Spread, int32 NumRotators)
+{
+	TArray<FRotator> Rotators;
+	
+	const FVector LeftMostDirection = Forward.RotateAngleAxis((-Spread / 2), Axis);
+	
+	if (NumRotators > 1)
+	{
+		const float DeltaSpread = Spread /(NumRotators - 1);
+		for (int i = 0; i < NumRotators; i++)
+		{
+			const FVector Direction = LeftMostDirection.RotateAngleAxis(i * DeltaSpread, FVector::UpVector);
+			Rotators.Add(Direction.Rotation());
+		}
+	}
+	else
+	{
+		Rotators.Add(Forward.Rotation());
+	}
+	return Rotators;
+	
+}
+
+TArray<FVector> UAuraAbilitySystemLibrary::EvenlySpaceVectors(const FVector& Forward, const FVector& Axis, float Spread,
+                                                              int32 NumVectors)
+{
+	TArray<FVector> Vectors;
+	
+	const FVector LeftMostDirection = Forward.RotateAngleAxis((-Spread / 2), Axis);
+	
+	if (NumVectors > 1)
+	{
+		const float DeltaSpread = Spread /(NumVectors - 1);
+		for (int i = 0; i < NumVectors; i++)
+		{
+			const FVector Direction = LeftMostDirection.RotateAngleAxis(i * DeltaSpread, FVector::UpVector);
+			Vectors.Add(Direction);
+		}
+	}
+	else
+	{
+		Vectors.Add(Forward);
+	}
+	return Vectors;
+}
+
 // 获取该NPC在*等级下能够给玩家提供多少XP
 int32 UAuraAbilitySystemLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 CharacterLevel)
 {

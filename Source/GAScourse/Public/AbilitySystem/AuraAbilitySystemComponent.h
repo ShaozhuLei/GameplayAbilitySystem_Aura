@@ -31,6 +31,7 @@ public:
 	bool bStartupAbilitiesGiven = false;
 
 	//从PlayerController中调用这些函数
+	void AbilityInputTagPressed(const FGameplayTag& InputTag);
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
 	void ForEachAbility(const FForEachAbility& Delegate);

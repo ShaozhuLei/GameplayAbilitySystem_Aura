@@ -50,17 +50,24 @@ void AAuraProjectile::OnHit()
 {
 	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-	if (LoopingSoundComponent) LoopingSoundComponent->Stop();
+	if (LoopingSoundComponent)
+	{
+		LoopingSoundComponent->Stop();
+		LoopingSoundComponent->DestroyComponent();
+	} 
 	bHit = true;
 }
 
 void AAuraProjectile::Destroyed()
 {
-	//如果没有击中并且没有在服务器端
-	if (!bHit && !HasAuthority())
+	if (LoopingSoundComponent)
 	{
-		OnHit();
-	}
+		LoopingSoundComponent->Stop();
+		LoopingSoundComponent->DestroyComponent();
+	} 
+	//如果没有击中并且没有在服务器端
+	if (!bHit && !HasAuthority()) OnHit();
+	
 	Super::Destroyed();
 }
 
@@ -100,9 +107,6 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		Destroy();
 	}
 	else bHit = true;
-	
-
-	
 }
 
 

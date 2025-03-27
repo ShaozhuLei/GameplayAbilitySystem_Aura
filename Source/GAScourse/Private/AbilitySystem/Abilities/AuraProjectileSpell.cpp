@@ -48,29 +48,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 			GetOwningActorFromActorInfo(),
 			Cast<APawn>(GetOwningActorFromActorInfo()),
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-
-		/*赋予发射物一个GA用来造成伤害,要利用ASC来封装Spec*/
-		//先通过静态方法获取ASC
-		// const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
-		// FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
-		// EffectContextHandle.SetAbility(this);
-		// EffectContextHandle.AddSourceObject(Projectile);
-		// TArray<TWeakObjectPtr<AActor>> Actors;
-		// Actors.Add(Projectile);
-		// EffectContextHandle.AddActors(Actors);
-		// FHitResult HitResult;
-		// HitResult.Location= ProjectileTargetLocation;
-		// EffectContextHandle.AddHitResult(HitResult);
-		//
-		// //利用GE,等级,ContextHandle来封装GE_SpecHandle
-		// const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
-		// const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-		//
-		// const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
-		// UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageType, ScaledDamage);
 		
-		//通过该Projectile所携带的Handle应用到Target上;此时SpecHandle携带着<Tag, Damage> pair; DamageEffectSpecHandle是发射物基类的属性
-		//Projectile->DamageEffectSpecHandle = SpecHandle;
 		Projectile->DamageEffectParams = MakeDamageParamFromClassDefaults();
 		Projectile->FinishSpawning(SpawnTransform);
 	}

@@ -52,6 +52,23 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(
 	}
 }
 
+void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
+{
+	if (!InputTag.IsValid()) return;
+ 
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
+		{
+			AbilitySpecInputPressed(AbilitySpec);
+			if (AbilitySpec.IsActive())
+			{
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+			}
+		}
+	}
+}
+
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
@@ -78,10 +95,11 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 	for (FGameplayAbilitySpec& AbilitySpec: GetActivatableAbilities())
 	{
 		//触发与InputTag一致的技能
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
+		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag) && AbilitySpec.IsActive())
 		{
 			//标记该能力的输入状态为“已释放”。
 			AbilitySpecInputReleased(AbilitySpec);
+			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, AbilitySpec.ActivationInfo.GetActivationPredictionKey());
 		}
 	}
 }
@@ -235,7 +253,7 @@ void UAuraAbilitySystemComponent::ServerSpendSpellPoints_Implementation(const FG
 		const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 		FGameplayTag Status = GetStatusFromSpec(*AbilitySpec);
 
-		//如果是"已学未装备"
+		//如果是"可学但未学"
 		if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
 		{
 			AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Eligible);
@@ -267,7 +285,6 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
  			ClearAbiliesOfSlot(Slot);
 			ClearSlot(AbilitySpec);
 			AbilitySpec->DynamicAbilityTags.AddTag(Slot);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%s"), *Slot.ToString()));
 			if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
 			{
 				AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Unlocked);
@@ -294,6 +311,7 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag
 	{
 		if (UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
 		{
+			int32 LevelText = AbilitySpec->Level;
 			OutDescription = AuraAbility->GetDescription(AbilitySpec->Level);
 			OutNextLevelDescription = AuraAbility->GetNextLevelDescription(AbilitySpec->Level + 1);
 			return true;
