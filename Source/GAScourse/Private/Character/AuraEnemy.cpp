@@ -30,7 +30,8 @@ AAuraEnemy::AAuraEnemy()
 
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
-	
+
+	BaseWalkSpeed = 250.f;
 }
 
 
@@ -127,6 +128,7 @@ void AAuraEnemy::BeginPlay()
 			this,
 			&AAuraEnemy::HitReactTagChanged
 		);
+		
 
 		//给敌人单位赋予初始值
 		OnHealthChanged.Broadcast(AuraASC->GetHealth());
@@ -149,6 +151,8 @@ void AAuraEnemy::InitAbilityActorInfo()
 {
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+	//监听Tag是否被添加
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::StunTagChanged);
 
 	if (HasAuthority())
 	{
@@ -157,7 +161,17 @@ void AAuraEnemy::InitAbilityActorInfo()
 	OnAscRegistered.Broadcast(AbilitySystemComponent);
 }
 
-void AAuraEnemy::InitializeDefaultAttributes() const
+void AAuraEnemy::InitializeDefaultAttributes() const 
 {
 	UAuraAbilitySystemLibrary::InitializeDefaultAttribute(this, CharacterClass, Level, AbilitySystemComponent);
+}
+
+void AAuraEnemy::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	Super::StunTagChanged(CallbackTag, NewCount);
+	
+	if (HasAuthority() && AIControllerClass && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"), bIsStunned);
+	}
 }

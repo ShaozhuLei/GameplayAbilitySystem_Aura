@@ -118,17 +118,16 @@ void UOverlayWidgetController::OnXPChanged(int32 NewXP)
 
 	const int32 Level = LevelUpInfo->FindLevelForXP(NewXP);
 	const int32 MaxLevel = LevelUpInfo->LevelUpInformation.Num();
-
+	
 	if (Level <= MaxLevel && Level > 0)
 	{
 		const int32 LevelRequirement = LevelUpInfo->LevelUpInformation[Level].LevelUpRequirement;
-		const int32 PreLevelRequirement = LevelUpInfo->LevelUpInformation[Level - 1].LevelUpRequirement;
+		const int32 PreLevelUpRequirement = LevelUpInfo->LevelUpInformation[Level - 1].LevelUpRequirement;
 
-		const int32 CurrentLevelGap = LevelRequirement - PreLevelRequirement;
-		const int32 XPInCurrentLevel = NewXP - PreLevelRequirement;
+		const int32 DeltaLevelRequirement = LevelRequirement - PreLevelUpRequirement;
+		const int32 XPForThisLevel  = NewXP - PreLevelUpRequirement;
 
-		const float FinalXPPercent = static_cast<float>(XPInCurrentLevel) / static_cast<float>(CurrentLevelGap);
-
+		const float FinalXPPercent = static_cast<float>(XPForThisLevel) / static_cast<float>(DeltaLevelRequirement);
 		OnXPPercentChangedDelegate.Broadcast(FinalXPPercent);
 	}
 }

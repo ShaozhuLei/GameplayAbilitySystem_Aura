@@ -34,6 +34,7 @@ public:
 	virtual void Die(const FVector& DeathImpulse) override;
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
+	
 	/*End CombatInterface*/
 
 	UPROPERTY(BlueprintReadWrite, Category="Combat")
@@ -52,18 +53,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Combat")
 	bool bHitReacting = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat")
-	float BaseWalkSpeed = 250.f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	float LifeSpan = 5.f;
 
-	
-	
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
 	virtual void InitializeDefaultAttributes() const override;
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
 	
 	//不做Replication的原因是，level只在服务器端进行追踪
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Charater Class Defaults")

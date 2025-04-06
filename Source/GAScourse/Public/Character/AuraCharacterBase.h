@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
@@ -25,7 +26,9 @@ class GASCOURSE_API AAuraCharacterBase : public ACharacter, public IAbilitySyste
 public:
 	// Sets default values for this character's properties
 	AAuraCharacterBase();
+	virtual void Tick(float DeltaSeconds) override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;};
 
 	//只在服务器上调用该函数
@@ -40,7 +43,11 @@ public:
 	virtual int32 GetMinionCount_Implementation() override;
 	virtual void IncrementMinionCount_Implementation(const int32 Amount) override;
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
-	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
+	virtual FOnDeathSignature& GetOnDeathDelegate() override;
+	virtual bool IsBeingShocked_Implementation() override;
+	virtual void SetIsBeingShocked_Implementation(bool bInShock) override;
 
 	FOnASCRegistered OnAscRegistered;;
 
@@ -48,8 +55,25 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath(const FVector& DeathImpulse);
 
+	FOnDeathSignature OnDeathDelegate;
+
 	UPROPERTY(EditAnywhere, Category="Combat")
 	TArray<FTagMontage> AttackMontages;
+
+	UPROPERTY(ReplicatedUsing=OnRep_Stunned, BlueprintReadOnly)
+	bool bIsStunned = false;
+ 
+	UPROPERTY(ReplicatedUsing=OnRep_Burned, BlueprintReadOnly)
+	bool bIsBurned = false;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	bool bIsBeingShocked = false;
+ 
+	UFUNCTION()
+	virtual void OnRep_Stunned();
+ 
+	UFUNCTION()
+	virtual void OnRep_Burned();
 
 protected:
 	// Called when the game starts or when spawned
@@ -72,8 +96,11 @@ protected:
 
 	bool IsDead = false;
 
-	
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat")
+	float BaseWalkSpeed = 600.f;
+	
 	//定义Ability system component指针
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -132,6 +159,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UDebuffNiagaraComponent> StunDebuffComponent;
+
 private:
 	
 	UPROPERTY(EditAnywhere, Category="Abilities")
@@ -142,4 +172,16 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Combat")
 	TObjectPtr<UAnimMontage> HitReactMontage;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtectionNiagaraSystem;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> LifeSiphonNiagaraSystem;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNiagaraSystem;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> EffectAttachComponent;
 };

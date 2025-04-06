@@ -54,3 +54,8 @@ FTagMontage UAuraDamageGameplayAbility::GetRandomTagMontageFromArray(const TArra
 	return FTagMontage();
 }
 
+float UAuraDamageGameplayAbility::GetDamageAtLevel() const
+{
+	return Damage.GetValueAtLevel(GetAbilityLevel());
+}
+

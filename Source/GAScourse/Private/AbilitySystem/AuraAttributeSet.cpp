@@ -316,13 +316,16 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		}
 		else
 		{
-			//通过Tags将GA应用到角色身上
-			FGameplayTagContainer TagsContainer;
-			TagsContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
-			Props.TargetASC->TryActivateAbilitiesByTag(TagsContainer);
+			if (Props.TargetCharacter->Implements<UCombatInterface>() && !ICombatInterface::Execute_IsBeingShocked(Props.TargetCharacter))
+			{
+				//通过Tags将GA应用到角色身上
+				FGameplayTagContainer TagsContainer;
+				TagsContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagsContainer);
+			}
 			
 			const FVector& KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackForce(Props.EffectContextHandle);
-			if (!KnockbackForce.IsNearlyZero(0.1f))
+			if (!KnockbackForce.IsNearlyZero(1.f))
 			{
 				Props.TargetCharacter->LaunchCharacter(KnockbackForce, true, true);
 			}
@@ -348,19 +351,25 @@ void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
 		//获取当前的Level和XP
 		const int32 CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceCharacter);
 		const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceCharacter);
-
+		
 		//计算新的等级是多少 和 一共升了多少级
+		
 		const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceCharacter, CurrentXP + LocalIncomingXP);
 		const int32 NumsLevel = NewLevel - CurrentLevel;
 
 		//如果确实有升级则给玩家发点属性和技能加点
 		if (NumsLevel > 0)
 		{
-			//查看该等级应该给几个加点
-			const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
-			const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
-
 			IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumsLevel);
+			//查看该等级应该给几个加点
+			int32 AttributePointsReward = 0;
+			int32 SpellPointsReward = 0;
+
+			for (int i = 0; i < NumsLevel; ++i)
+			{
+				SpellPointsReward += IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel + i);
+				AttributePointsReward += IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceAvatar, CurrentLevel + i);
+			}
 			IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
 			IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 
@@ -393,16 +402,22 @@ void UAuraAttributeSet::Debuff(const FEffectProperties& Props)
 	Effect->Period = DebuffFrequency;
 	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
 
-	FInheritedTagContainer InheritedTags;
-	InheritedTags.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
-	UTargetTagsGameplayEffectComponent& Component = Effect->AddComponent<UTargetTagsGameplayEffectComponent>();
-	Component.SetAndApplyTargetTagChanges(InheritedTags);
+	//FInheritedTagContainer InheritedTags;
+	//InheritedTags.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
+	const FGameplayTag DebuffTag = GameplayTags.DamageTypesToDebuffs[DamageType];
+	UTargetTagsGameplayEffectComponent& AssetTagsComponent = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
+	FInheritedTagContainer InheritedTagContainer;
+	InheritedTagContainer.Added.AddTag(DebuffTag);
 
-	// FInheritedTagContainer TagContainer = FInheritedTagContainer();
-	// UTargetTagsGameplayEffectComponent& Component = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
-	// TagContainer.Added.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
-	// TagContainer.CombinedTags.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
-	// Component.SetAndApplyTargetTagChanges(TagContainer);
+	if (DebuffTag.MatchesTagExact(GameplayTags.Debuff_Stun))
+	{
+		// Stunned, so block input
+		InheritedTagContainer.Added.AddTag(GameplayTags.Player_Block_CursorTrace);
+		InheritedTagContainer.Added.AddTag(GameplayTags.Player_Block_InputHeld);
+		InheritedTagContainer.Added.AddTag(GameplayTags.Player_Block_InputPressed);
+		InheritedTagContainer.Added.AddTag(GameplayTags.Player_Block_InputReleased);
+	}
+	AssetTagsComponent.SetAndApplyTargetTagChanges(InheritedTagContainer);
 	
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
 	Effect->StackLimitCount = 1;

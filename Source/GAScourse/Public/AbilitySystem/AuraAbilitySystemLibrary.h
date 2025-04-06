@@ -106,6 +106,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySusystemLibrary|GameplayMehcanics")
 	static void GetLivePlayerWithRadius(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin);
 
+	static void GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& ClosestTargets, const FVector& Origin);
+	
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySusystemLibrary|GameplayMehcanics")
 	static bool IsNotFriend(AActor* FirstActor, AActor* SecondFriend);
 
@@ -119,7 +121,6 @@ public:
 	static TArray<FVector> EvenlySpaceVectors(const FVector& Forward, const FVector& Axis, float Spread, int32 NumVectors);
 
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 CharacterLevel);
-
 	
 };
 
