@@ -29,6 +29,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;};
 
 	//只在服务器上调用该函数
@@ -48,15 +49,16 @@ public:
 	virtual FOnDeathSignature& GetOnDeathDelegate() override;
 	virtual bool IsBeingShocked_Implementation() override;
 	virtual void SetIsBeingShocked_Implementation(bool bInShock) override;
+	virtual FOnDamageSignature& GetOnDamageSignature();
 
 	FOnASCRegistered OnAscRegistered;;
+	FOnDeathSignature OnDeathDelegate;
+	FOnDamageSignature OnDamageDelegate;
 
 	//控制所有客户端中角色的死亡
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath(const FVector& DeathImpulse);
-
-	FOnDeathSignature OnDeathDelegate;
-
+	
 	UPROPERTY(EditAnywhere, Category="Combat")
 	TArray<FTagMontage> AttackMontages;
 

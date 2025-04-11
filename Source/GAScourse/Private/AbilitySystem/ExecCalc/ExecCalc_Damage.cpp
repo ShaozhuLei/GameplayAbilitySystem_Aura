@@ -10,6 +10,7 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/WidgetController/SpellMenuWidgetController.h"
 
 struct AuraDamageStatics
@@ -162,6 +163,8 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	}
 
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
+	/*开始使用我们自定义的FGameplayEffectContext(已在函数库中封装好)*/
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	
 	/*获取 FAggregatorEvaluateParameters&, Gather Tags from source and target
 	* -CapturedSourceTags 是一个 FGameplayEffectAttributeCaptureSpecContainer
@@ -179,7 +182,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	DetermineDebuff(ExecutionParams, Spec, EvaluationParameters, TagsToCaptureDefs);
 	
 	//开始捕捉一些属性
-	float Damage = 0;
+	float Damage = 0.f;
 	for (const TTuple<FGameplayTag, FGameplayTag>& Pair: FAuraGameplayTags::Get().DamageTypesToResistances)
 	{
 		const FGameplayTag DamageTypeTag = Pair.Key;
@@ -189,6 +192,8 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		const FGameplayEffectAttributeCaptureDefinition CaptureDef = TagsToCaptureDefs[ResistanceTag];
 
 		float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key, false);
+
+		if (DamageTypeValue <= 0.f) continue;
 		
 		float Resistance = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDef, EvaluationParameters, Resistance);
@@ -196,6 +201,29 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 		DamageTypeValue *= (100.f - Resistance) / 100.f;
 		
+		if (UAuraAbilitySystemLibrary::IsRadialDamage(EffectContextHandle))
+		{
+			//重写TakeDamage在AuraCharacterBase
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetAvatar))
+			{
+				CombatInterface->GetOnDamageSignature().AddLambda([&](float DamageAmount)
+					{
+						DamageTypeValue = DamageAmount;
+					});
+			}
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				 TargetAvatar,
+				 DamageTypeValue,
+				 0.f,
+				 UAuraAbilitySystemLibrary::GetRadialDamageOrigin(EffectContextHandle),
+				 UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(EffectContextHandle),
+				 UAuraAbilitySystemLibrary::GetRadialDamageOuterRadius(EffectContextHandle),
+				 1.f,
+				 UDamageType::StaticClass(),
+				 TArray<AActor*>(),
+				 SourceAvatar,
+				 nullptr);
+		}
 		Damage += DamageTypeValue;
 	}
 	
@@ -209,8 +237,6 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	const bool bBlocked = FMath::RandRange(1, 100) < TargetBlockChance;
 	
-	/*开始使用我们自定义的FGameplayEffectContext(已在函数库中封装好)*/
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	UAuraAbilitySystemLibrary::SetIsBlockedHit(EffectContextHandle, bBlocked);
 	
 	//格挡成功 伤害减半

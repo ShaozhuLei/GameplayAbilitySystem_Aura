@@ -1,0 +1,112 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "AbilitySystem/Abilities/AuraFireBlast.h"
+
+#include "AuraGameplayTags.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Actor/AuraFireBall.h"
+
+FString UAuraFireBlast::GetDescription(int32 Level)
+{
+	const int32 ScaledDamage = Damage.GetValueAtLevel(Level);
+	const float ManaCost = FMath::Abs(GetManaCost(Level));
+	const float Cooldown = GetCooldown(Level);
+	return FString::Printf(TEXT(
+			// Title
+			"<Title>FIRE BLAST</>\n\n"
+ 
+			// Level
+			"<Small>Level: </><Level>%d</>\n"
+			// ManaCost
+			"<Small>ManaCost: </><ManaCost>%.1f</>\n"
+			// Cooldown
+			"<Small>Cooldown: </><Cooldown>%.1f</>\n\n"
+ 
+			// Number of Fire Balls
+			"<Default>Launches %d </>"
+			"<Default>fire balls in all directions, each coming back and </>"
+			"<Default>exploding upon return, causing </>"
+ 
+			// Damage
+			"<Damage>%d</><Default> radial fire damage with"
+			" a chance to burn</>"),
+ 
+			// Values
+			Level,
+			ManaCost,
+			Cooldown,
+			NumFireBalls,
+			ScaledDamage);
+}
+ 
+FString UAuraFireBlast::GetNextLevelDescription(int32 Level)
+{
+	const int32 ScaledDamage = Damage.GetValueAtLevel(Level);
+	const float ManaCost = FMath::Abs(GetManaCost(Level));
+	const float Cooldown = GetCooldown(Level);
+	return FString::Printf(TEXT(
+			// Title
+			"<Title>NEXT LEVEL:</>\n\n"
+ 
+			// Level
+			"<Small>Level: </><Level>%d</>\n"
+			// ManaCost
+			"<Small>ManaCost: </><ManaCost>%.1f</>\n"
+			// Cooldown
+			"<Small>Cooldown: </><Cooldown>%.1f</>\n\n"
+ 
+			// Number of Fire Balls
+			"<Default>Launches %d </>"
+			"<Default>fire balls in all directions, each coming back and </>"
+			"<Default>exploding upon return, causing </>"
+ 
+			// Damage
+			"<Damage>%d</><Default> radial fire damage with"
+			" a chance to burn</>"),
+ 
+			// Values
+			Level,
+			ManaCost,
+			Cooldown,
+			NumFireBalls,
+			ScaledDamage);
+}
+
+TArray<AAuraFireBall*> UAuraFireBlast::SpawnFireBall()
+{
+	TArray<AAuraFireBall*> FireBalls;
+	const FVector ForwardVector = FVector::ForwardVector;
+	FVector Location;
+	if(GetAvatarActorFromActorInfo()->Implements<UCombatInterface>())
+	{
+		Location = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), FAuraGameplayTags::Get().CombatSocket_Weapon);
+	}
+	
+	TArray<FRotator> Rotators = UAuraAbilitySystemLibrary::EvenlySpaceRotators(ForwardVector, FVector::UpVector, 360.f, NumFireBalls);
+	
+	for (const FRotator& Rotator : Rotators)
+	{
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(Location);
+		SpawnTransform.SetRotation(Rotator.Quaternion());
+
+		AAuraFireBall* FireBall = GetWorld()->SpawnActorDeferred<AAuraFireBall>(
+			FireBallClass,
+			SpawnTransform,
+			GetOwningActorFromActorInfo(),
+			CurrentActorInfo->PlayerController->GetPawn(),
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+		FireBall->DamageEffectParams = MakeDamageParamFromClassDefaults();
+		FireBall->ReturnToActor = GetAvatarActorFromActorInfo();
+
+		FireBall->ExplosionDamageParams = MakeDamageParamFromClassDefaults();
+		FireBall->SetOwner(GetAvatarActorFromActorInfo());
+
+		FireBalls.Add(FireBall);
+		FireBall->FinishSpawning(SpawnTransform);
+	}
+	return FireBalls;
+}
+

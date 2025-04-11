@@ -158,6 +158,23 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	
 }
 
+void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	if (Attribute == GetHealthAttribute() && bTopOffHealth)
+	{
+		SetHealth(GetMaxHealth());
+		bTopOffHealth = false;
+	} 
+	
+	if (Attribute == GetHealthAttribute() && bTopOffMana)
+	{
+		SetHealth(GetMaxMana());
+		bTopOffMana = false;
+	} 
+	
+}
+
 void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props,const float Damage, bool bBlockHit, bool bCriticalHit) const
 {
 		//若对象不是自己
@@ -374,8 +391,8 @@ void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
 			IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 
 			//升级可以恢复满血满蓝
-			SetHealth(GetMaxHealth());
-			SetMana(GetMaxMana());
+			bTopOffHealth = true;
+			bTopOffMana = true;
 
 			IPlayerInterface::Execute_LevelUp(Props.SourceCharacter);
 		}

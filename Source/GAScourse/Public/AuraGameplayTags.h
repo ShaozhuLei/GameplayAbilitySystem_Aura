@@ -85,6 +85,7 @@ public:
 	FGameplayTag Abilities_Type_None;
 	
 	FGameplayTag Abilities_Fire_FireBolt;
+	FGameplayTag Abilities_Fire_FireBlast;
 	FGameplayTag Abilities_Lighting_Electrocute;
 	FGameplayTag Abilities_Arcane_ArcaneShards;
 
@@ -113,7 +114,9 @@ public:
 	FGameplayTag Player_Block_InputHeld;
 	FGameplayTag Player_Block_InputReleased;
 	FGameplayTag Player_Block_CursorTrace;
-protected:
+
+	//GameplayCue
+	FGameplayTag GameplayCue_FireBlast;
 
 private:
 	//定义了一个类型为FAuraGameplayTags的成员变量
