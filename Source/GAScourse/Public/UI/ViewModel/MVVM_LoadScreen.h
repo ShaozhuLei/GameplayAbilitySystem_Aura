@@ -6,6 +6,8 @@
 #include "MVVMViewModelBase.h"
 #include "MVVM_LoadScreen.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSlotSelected);
+
 /**
  * 
  */
@@ -15,6 +17,8 @@ class GASCOURSE_API UMVVM_LoadScreen : public UMVVMViewModelBase
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FSlotSelected SlotSelected;
  
 	void InitializeLoadSlots();
  
@@ -23,6 +27,17 @@ public:
  
 	UFUNCTION(BlueprintPure)
 	UMVVM_LoadSlot* GetLoadSlotViewModelByIndex(int32 Index) const;
+
+	UFUNCTION(BlueprintCallable)
+	void NewSlotButtonPressed(int32 Slot, const FString& EnterName);
+
+	UFUNCTION(BlueprintCallable)
+	void NewGameButtonPressed(int32 Slot);
+
+	UFUNCTION(BlueprintCallable)
+	void SelectSlotButtonPressed(int32 Slot);
+	
+	void LoadData();
  
 private:
  
