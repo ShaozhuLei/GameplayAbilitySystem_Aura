@@ -19,24 +19,31 @@ class GASCOURSE_API UMVVM_LoadSlot : public UMVVMViewModelBase
 
 public:
 	UPROPERTY(BlueprintAssignable)
-	FSetWidgetSwitcherIndex SetWidgetSwitcherIndex ;
+	FSetWidgetSwitcherIndex SetWidgetSwitcherIndex;
 
 	UPROPERTY(BlueprintAssignable)
-	FEnableSelectSlotButton EnableSelectSlotButton ;
-
+	FEnableSelectSlotButton EnableSelectSlotButton;
+	
 	void InitializeSlot();
 
 	UPROPERTY()
 	TEnumAsByte<ESaveSlotStatus> SlotStatus;
 
+	UPROPERTY()
+	int32 SlotIndex;
+
+	UPROPERTY()
+	FName PlayerStartTag;
+
 	void SetLoadSlotName(FString InLoadSlotName);
 	void SetPlayerName(FString InPlayerName);
-	void SetSlotIndex(FString InWidgetIndex);
-
+	void SetMapName(FString InMapName);
+	void SetPlayerLevel(int32 InPlayerLevel);
 	
 	FString GetLoadSlotName() const {return LoadSlotName;};
 	FString GetPlayerName() const {return PlayerName;};
-	FString GetSlotIndex() const {return SlotIndex;};
+	FString GetMapName() const {return MapName;};
+	int32 GetPlayerLevel() const {return PlayerLevel;};
 
 private:
 
@@ -47,5 +54,8 @@ private:
 	FString PlayerName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta = (AllowPrivateAccess="true"))
-	FString SlotIndex;
+	FString MapName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta = (AllowPrivateAccess="true"))
+	int32 PlayerLevel;
 };

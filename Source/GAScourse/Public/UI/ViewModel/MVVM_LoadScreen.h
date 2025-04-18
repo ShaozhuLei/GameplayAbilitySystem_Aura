@@ -19,6 +19,9 @@ class GASCOURSE_API UMVVM_LoadScreen : public UMVVMViewModelBase
 public:
 	UPROPERTY(BlueprintAssignable)
 	FSlotSelected SlotSelected;
+
+	UPROPERTY(BlueprintAssignable)
+	FSlotSelected EmptyEnteredName;
  
 	void InitializeLoadSlots();
  
@@ -35,7 +38,16 @@ public:
 	void NewGameButtonPressed(int32 Slot);
 
 	UFUNCTION(BlueprintCallable)
+	void PlayButtonPressed();
+
+	UFUNCTION(BlueprintCallable)
 	void SelectSlotButtonPressed(int32 Slot);
+
+	UFUNCTION(BlueprintCallable)
+	void YesButtonPressed();
+
+	UFUNCTION(BlueprintCallable)
+	void NoButtonPressed();
 	
 	void LoadData();
  
@@ -51,5 +63,8 @@ private:
 	TObjectPtr<UMVVM_LoadSlot> LoadSlot_1;
  
 	UPROPERTY()
-	TObjectPtr<UMVVM_LoadSlot> LoadSlot_2;	
+	TObjectPtr<UMVVM_LoadSlot> LoadSlot_2;
+
+	UPROPERTY()
+	TObjectPtr<UMVVM_LoadSlot> SelectedSlot;
 };

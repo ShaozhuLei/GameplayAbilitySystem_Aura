@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "GameplayEffectTypes.h"
-#include <stdbool.h>
 #include "AuraAbilityTypes.generated.h"
 class UGameplayEffect;
 

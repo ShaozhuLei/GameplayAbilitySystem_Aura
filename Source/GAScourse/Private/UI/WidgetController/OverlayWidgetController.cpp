@@ -28,9 +28,9 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	GetAuraPS()->OnXPChangedDelegate.AddUObject(this, &UOverlayWidgetController::OnXPChanged);
 	GetAuraPS()->OnLevelChangedDelegate.AddLambda(
-		[this](const int32 Level)
+		[this](const int32 Level, bool bLevelUp)
 		{
-			OnLevelChangedDelegate.Broadcast(Level);
+			OnLevelChangedDelegate.Broadcast(Level, bLevelUp);
 		}
 	);
 	//用于监听指定属性（Gameplay Attribute）的值变化。当属性值发生变化时，触发相关的回调函数
