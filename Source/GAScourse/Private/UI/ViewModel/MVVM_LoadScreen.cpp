@@ -39,11 +39,13 @@ void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString& EnterName
  	}
  	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 
+ 	//初始化Slot信息
  	LoadSlots[Slot]->SetMapName(AuraGameMode->DefaultMapName);
  	LoadSlots[Slot]->SetPlayerName(EnterName);
  	LoadSlots[Slot]->SetPlayerLevel(1);
  	LoadSlots[Slot]->SlotStatus = Taken;
  	LoadSlots[Slot]->PlayerStartTag = AuraGameMode->DefaultPlayerStartTag;
+ 	LoadSlots[Slot]->MapAssetName = AuraGameMode->DefaultMap.ToSoftObjectPath().GetAssetName();
  	
  	AuraGameMode->SaveSlotData(LoadSlots[Slot], Slot);
  	LoadSlots[Slot]->InitializeSlot();
@@ -108,7 +110,7 @@ void UMVVM_LoadScreen::NoButtonPressed()
  	
 }
 
-//HUD中调用(游戏开始时调用)
+//HUD中调用(游戏开始时调用),展示已经有了的存档
 void UMVVM_LoadScreen::LoadData()
 {
  	AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));

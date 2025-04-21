@@ -9,6 +9,7 @@
 #include "Input/AuraInputConfig.h"
 #include "AuraPlayerController.generated.h"
 
+class IHighlightInterface;
 class AMagicCircle;
 class UNiagaraSystem;
 class UDamageTextComponent;
@@ -18,6 +19,13 @@ struct FInputActionValue;
 class IEnemyInterface;
 class UAuraAbilitySystemComponent;
 class USplineComponent;
+
+enum class ETargetingStatus : uint8
+{
+	TargetingEnemy,
+	TargetingNonEnemy,
+	NotTargeting
+};
 /**
  * 
  */
@@ -65,9 +73,11 @@ private:
 
 	void CursorTrace();
 	//角色亮光展示
-	IEnemyInterface* LastActor;
-	IEnemyInterface* ThisActor;
+	TObjectPtr<AActor> LastActor;
+	TObjectPtr<AActor> ThisActor;
 	FHitResult CursorHit;
+	static void HighlightActor(AActor* InActor);
+	static void UnHighlightActor(AActor* InActor);
 
 	//按键事件
 	void AbilityInputTagPressed(FGameplayTag InputTag);
@@ -90,7 +100,7 @@ private:
 	float ShortPressedThreshold = 0.5f;
 	bool bAutoRunning = false;
 	//是否是在瞄准敌人
-	bool bTargeting = false;
+	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
 	//离目标还有多远
 	float AutoRunAcceptanceRadius = 50.f;
 

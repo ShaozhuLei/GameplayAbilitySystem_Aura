@@ -20,6 +20,7 @@
 #include "Interaction/EnemyInterface.h"
 #include "GameFramework/Character.h"
 #include "GAScourse/GAScourse.h"
+#include "Interaction/HighlightInterface.h"
 #include "UI/Widget/DamageTextComponent.h"
 
 AAuraPlayerController::AAuraPlayerController()
@@ -129,12 +130,15 @@ void AAuraPlayerController::UpdateMagicCircleLocation()
 
 void AAuraPlayerController::CursorTrace()
 {
+	//电击时要取消的一些鼠标效果
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
 	{
-		if (LastActor) LastActor->UnHighlightActor();
-		if (ThisActor) ThisActor->UnHighlightActor();
+		UnHighlightActor(LastActor);
+		UnHighlightActor(ThisActor);
+			
 		LastActor = nullptr;
 		ThisActor = nullptr;
+		return;
 	}
 	const ECollisionChannel TraceChannel = IsValid(MagicCircle)? ECC_ExcludesPlayers: ECC_Visibility;
 	GetHitResultUnderCursor(TraceChannel, false, CursorHit);
@@ -142,27 +146,37 @@ void AAuraPlayerController::CursorTrace()
 
 	LastActor = ThisActor;
 	
-	//检查 CursorHit.GetActor() 返回的 Actor 是否实现了 IEnemyInterface 接口。
+	//检查 CursorHit.GetActor() 返回的 Actor 是否实现了 IHighlightInterface 接口。
 	//如果实现了接口，Cast 返回该对象的接口指针；否则，返回 nullptr。
-	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
-
-	/**
-	 * Line trace from cursor. There are several sceneior:
-	 * A: LastActor is null && ThisActor is null
-	 *  -Do nothing.
-	 * B: LastActor is null && ThisActor is valid
-	 *	- Highlight ThisActor
-	 * C: LastActor is valid && ThisActor is null
-	 *	- UnHighlight LastActor
-	 * D: Both Actor are valid, LastActor != ThisActor
-	 *  - UnHighLight LastActor, Highlight ThisActor
-	 * E: Both Actor are valid, LastActor == ThisActor
-	 *  - Do nothing
-	 */
+	if (IsValid(CursorHit.GetActor()) && CursorHit.GetActor()->Implements<UHighlightInterface>())
+	{
+		ThisActor = CursorHit.GetActor();
+	}
+	else
+	{
+		ThisActor = nullptr;
+	}
+	
 	if (LastActor != ThisActor)
 	{
-		if (LastActor) LastActor->UnHighlightActor();
-		if (ThisActor) ThisActor->HighlightActor();
+		UnHighlightActor(LastActor);
+		HighlightActor(ThisActor);
+	}
+}
+
+void AAuraPlayerController::HighlightActor(AActor* InActor)
+{
+	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
+	{
+		IHighlightInterface::Execute_HighlightActor(InActor);
+	}
+}
+
+void AAuraPlayerController::UnHighlightActor(AActor* InActor)
+{
+	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
+	{
+		IHighlightInterface::Execute_UnHighlightActor(InActor);
 	}
 }
 
@@ -176,9 +190,15 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	//检查是否是鼠标左键点
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
-		//判断ThisActor是否是空指针
-		bTargeting = ThisActor ? true : false;
-		//轻点鼠标代表不是自动跑路
+		if (IsValid(ThisActor))
+		{
+			TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
+			bAutoRunning = false;
+		}
+		else
+		{
+			TargetingStatus = ETargetingStatus::NotTargeting;
+		}
 		bAutoRunning = false;
 	}
 	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
@@ -202,14 +222,23 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
 
 	//既不是在瞄准，也没有按下Shift则可以继续自动寻路
-	if (!bTargeting && !bShiftKeyDown)
+	if (TargetingStatus != ETargetingStatus::TargetingEnemy && !bShiftKeyDown)
 	{
 		/*运行到此处说明没有进行Targeting,则可以继续执行移动逻辑
 		 * Release后 还要查看是否是Short click
 		 */
 		const APawn* ControlledPawn = GetPawn();
+		//该条件成立说明是点了一下，而不是点着不松
 		if (FollowTime <= ShortPressedThreshold && ControlledPawn)
 		{
+			if (IsValid(ThisActor) && ThisActor->Implements<UHighlightInterface>())
+			{
+				IHighlightInterface::Execute_SetMoveToLocation(ThisActor, CachedDestination);
+			}
+			else if (GetASC() && !GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed))
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+			}
 			//寻找路径, 该函数返回一了Navigation Path的指针
 			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
 			{
@@ -224,14 +253,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 				if (NavPath->PathPoints.Num() > 0) CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() -	1];
 				bAutoRunning = true;
 			}
-			if (GetASC() && !GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed))
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
-			}
 		}
 		//重制跟随时间和是否瞄准的是角色
 		FollowTime = 0.f;
-		bTargeting = false;
+		TargetingStatus = ETargetingStatus::NotTargeting;
 	}
 }
 
@@ -251,7 +276,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	}
 	
 	//如果是在瞄准,则释放技能
-	if (bTargeting || bShiftKeyDown)
+	if (TargetingStatus == ETargetingStatus::TargetingEnemy || bShiftKeyDown)
 	{
 		//检查是否有合法的ASC
 		if (GetASC())

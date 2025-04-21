@@ -54,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySusystemLibrary|CharaterClassDefault")
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|CharacterClassDefaults", meta = (DefaultToSelf = "WorldContextObject"))
+	static ULootTiers* GetLootTiers(const UObject* WorldContextObject);
+
 	//伤害属性相关 UGameplayAbilityContext
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySustemLibrary|GameplayEffect")
 	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);

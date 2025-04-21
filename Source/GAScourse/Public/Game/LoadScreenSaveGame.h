@@ -71,7 +71,7 @@ struct FSavedAbility
 	FGameplayTag AbilityType = FGameplayTag();
  
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 AbilityLevel;
+	int32 AbilityLevel = 1;
 };
 
 //使用内联的方式比较两个FSavedAbility是否一样
@@ -101,6 +101,9 @@ public:
 
 	UPROPERTY()
 	FString MapName = FString("Default Name");
+
+	UPROPERTY()
+	FString MapAssetName = FString("Default Map Asset Name");
 
 	UPROPERTY()
 	TEnumAsByte<ESaveSlotStatus> SaveSlotStatus = Vacant;

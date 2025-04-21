@@ -1,3 +1,4 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
@@ -6,6 +7,7 @@
 #include "AuraCharacterBase.h"
 #include "Components/WidgetComponent.h"
 #include "Interaction/EnemyInterface.h"
+#include "Interaction/HighlightInterface.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
 
@@ -17,7 +19,7 @@ class UBehaviorTree;
 class AAuraAIController;
 
 UCLASS()
-class GASCOURSE_API AAuraEnemy : public AAuraCharacterBase, public IEnemyInterface
+class GASCOURSE_API AAuraEnemy : public AAuraCharacterBase, public IEnemyInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 public:
@@ -25,9 +27,10 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 
-	//Enemy Interface
-	virtual void HighlightActor() override;
-	virtual void UnHighlightActor() override;
+	//Hightlight Interface
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnHighlightActor_Implementation() override;
+	virtual void SetMoveToLocation_Implementation(FVector& OutDestination) override;
 	
 	 /*CombatInterface*/
 	virtual int32 GetPlayerLevel_Implementation() override;
@@ -50,11 +53,16 @@ public:
 	UFUNCTION()
 	void HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCounts);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnLoot();
+
 	UPROPERTY(BlueprintReadOnly, Category="Combat")
 	bool bHitReacting = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	float LifeSpan = 5.f;
+
+	void SetLevel(int32 InLevel){Level = InLevel;}
 
 protected:
 	virtual void BeginPlay() override;
