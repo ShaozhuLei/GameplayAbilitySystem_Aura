@@ -1,4 +1,4 @@
-Project Introduction:
+Project Introduction:  
 A complete system of attributes and spells was constructed using GAS. 
 • Use the AI behaviour tree to design generic and proprietary behaviours for various NPCs. 
 • Building Network Serialization Algorithms and Deserialization Optimization.  
