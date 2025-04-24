@@ -1,3 +1,5 @@
+Watch the video click here plz -> https://youtu.be/3CKc4i_RZdw
+
 Project Introduction:  
 • A complete system of attributes and spells was constructed using GAS.   
 • Use the AI behaviour tree to design generic and proprietary behaviours for various NPCs.   
@@ -10,4 +12,4 @@ attributes and process information to the disk & cloud.
 • Implemented Loot item bobbing effect by using trigonometric function. Used trigonometric functions to create dynamic object   
 bobbing effects, which performed more efficiently than Timeline-based implementations.  
 
-Watch the video click here plz -> https://youtu.be/3CKc4i_RZdw
+
